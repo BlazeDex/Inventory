@@ -1,10 +1,9 @@
 export default class Product {
-    constructor(code, name, amount, cost, insert) {
+    constructor(code, name, amount, cost) {
         this._code = code;
         this._name = name;
         this._amount = amount;
-        this._cost = cost;
-        this._insert = insert;
+        this._cost = cost; 
     }
 
     getCode() {
@@ -25,11 +24,7 @@ export default class Product {
 
     getTotal() {
         return this.getAmount() * this.getCost();
-    }
-
-    getInsert() {
-        return this._insert;
-    }
+    }   
 
     dataHtml() {
         return `<div>
@@ -46,22 +41,19 @@ export default class Product {
         let inpName = document.querySelector('#txtName');
         let inpAmount = document.querySelector('#txtAmount');
         let inpCost = document.querySelector('#txtCost');
-        let inpInsert = document.querySelector('#txtInsert');
 
         let code = inpCode.value;
         let name = inpName.value;
         let amount = Number(inpAmount.value);
         let cost = Number(inpCost.value);
-        let insert = inpInsert.value;
-
+       
         if(code && name && amount && cost) {
             inpCode.value = '';
             inpName.value = '';
             inpAmount.value = '';
             inpCost.value = '';
-            inpInsert.value = '';
 
-            return new Product(code, name, amount, cost, insert);
+            return new Product(code, name, amount, cost);
         }
 
         return false;

@@ -33,8 +33,16 @@ class App {
             return;
         }
 
+        if(!this._inventory.add(product)) {
+            document.querySelector('#details').innerHTML += 
+            '<h4>Este producto ya está registrado.</h4>';
+            return;
+        }
+
         if(this._inventory._getLength() < 20) {
-            this._inventory.add(product);    
+            this._inventory.add(product);
+            document.querySelector('#details').innerHTML += 
+            `<h4>Se agregó el producto ${product.getCode()}.</h4>`;    
         } else {
             document.querySelector('#details').innerHTML += '<h4>El inventario ha alcanzado el límite de productos.</h4>';
         }
@@ -45,7 +53,7 @@ class App {
         let code = document.querySelector('#txtCode').value;
         let dltProduct = this._inventory.delete(code);
         let details = document.querySelector('#details');
-
+        
         if(dltProduct) { 
             console.log(dltProduct);
             details.innerHTML += `<h4>Producto ${code} eliminado.</h4>`; 
@@ -64,7 +72,7 @@ class App {
         let product = this._inventory.search(code);
         let details = document.querySelector('#details');
 
-        if(product) {              
+        if(product) {                     
             console.log(product);               
         } else if(code === '') {      
             details.innerHTML += '<h4>Ingresa un código de producto.</h4>';
@@ -97,19 +105,26 @@ class App {
     }
 
     insertProduct= () => {
-        let product = Product.readForm();       
-        let details = document.querySelector('#details');
+       let insert = document.querySelector('#txtInsert');
+       let pos = Number(insert.value);
+       let product = Product.readForm();
 
-        if(!product) {
-            details.innerHTML += '<h4>No has completado los espacios necesarios.</h4>';
-            return;
-        }
+       if(!pos || pos  === 0) {
+        document.querySelector('#details').innerHTML += '<h4>Ingresa una posición.</h4>';
+        return;
+       }
 
-        if(this._inventory._getLength() < 20) {
-            this._inventory.add(product);    
-        } else {
-            document.querySelector('#details').innerHTML += '<h4>El inventario ha alcanzado el límite de productos.</h4>';
-        }
+       insert.value = '';
+
+       if(!product) {
+        document.querySelector('#details').innerHTML += '<h4>No has completado los datos.</h4>';
+        return;
+       } 
+
+       if(this._inventory._getLength() < 20) {
+        this._inventory.insert(product, pos - 1);
+        details.innerHTML += `<h4>Se se agregó el producto ${product.getCode()} en la posición ${pos}.</h4>`;        
+       } 
     }   
 }
 new App();

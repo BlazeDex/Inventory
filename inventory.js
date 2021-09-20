@@ -5,14 +5,10 @@ export default class Inventory {
 
     add(product) {
         let pos = this._findProducts(product);        
-        if(pos) {
-            document.querySelector('#details').innerHTML += 
-            '<h4>Este producto ya está registrado.</h4>';
+        if(pos) {  
             return false;         
         }         
-        this._products.push(product);   
-        document.querySelector('#details').innerHTML += 
-        `<h4>Se agregó el producto ${product.getCode()}.</h4>`;
+        this._products.push(product);  
         return true;    
     }    
 
@@ -64,14 +60,26 @@ export default class Inventory {
         }    
     }
 
-    insert(position) {
-        for(let i = 0; i < this._getLength(); i++) {
-            if(this._products[i].getCode() === position) {
-                
+    insert(product, pos) {
+        let nPos;
 
-            }
+        if(this._getLength() < pos) {
+            return;
         }
-
+        
+        for(let i = pos; i < (this._products.length + 1); i++) {
+            if(i === this._getLength()) {
+                let a = this._findProducts(product);        
+                    if(a) {  
+                    return false;         
+                    }
+                this._products.push(product);
+                return true;
+            }
+            nPos = this._products[pos];
+            this._products[pos] = product;
+            product = nPos;   
+        }
     }
 
     //Inicio de: Métodos privados "Reverse"//
