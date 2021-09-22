@@ -21,44 +21,64 @@ class App {
         btnReverse.addEventListener('click', this.reverseList); 
         //Botón "Insertar"//
         let btnInsert = document.querySelector('#btnInsert');
-        btnInsert.addEventListener('click', this.insertProduct); 
+        btnInsert.addEventListener('click', this.insertProduct);    
     }
 
-    addProduct = () => {
-        let product = Product.readForm();       
+    // Función para añadir un producto //
+    addProduct = () => {         
         let details = document.querySelector('#details');
+        let inpCode = document.querySelector('#txtCode');
+        let inpName = document.querySelector('#txtName');
+        let inpAmount = document.querySelector('#txtAmount');
+        let inpCost = document.querySelector('#txtCost');
+        let code = inpCode.value;
+        let name = inpName.value;
+        let amount = Number(inpAmount.value);
+        let cost = Number(inpCost.value);   
 
-        if(!product) {
-            details.innerHTML += '<h4>No has completado los espacios necesarios.</h4>';
-            return;
-        }
+        if(code && name && amount && cost ) {
+            inpCode.value = '';
+            inpName.value = '';
+            inpAmount.value = '';
+            inpCost.value = '';
+            
+            let product =  new Product(code, name, amount, cost); 
 
-        if(!this._inventory.add(product)) {
-            document.querySelector('#details').innerHTML += 
-            '<h4>Este producto ya está registrado.</h4>';
-            return;
-        }
+            if(!this._inventory.add(product)) {
+                details.innerHTML += 
+                '<h4>Este producto ya está registrado.</h4>';
+                return;
+            }
 
-        if(this._inventory._getLength() < 20) {
+           if(this._inventory._getLength() < 20) {
             this._inventory.add(product);
-            document.querySelector('#details').innerHTML += 
-            `<h4>Se agregó el producto ${product.getCode()}.</h4>`;    
+            details.innerHTML += 
+            `<h4>Se agregó el producto ${product.getCode()}.</h4>`;                
+            } else {
+            details.innerHTML += 
+            '<h4>El inventario ha alcanzado el límite de productos.</h4>';            
+            } 
         } else {
-            document.querySelector('#details').innerHTML += '<h4>El inventario ha alcanzado el límite de productos.</h4>';
-        }
+          details.innerHTML += 
+           '<h4>Ingresa los datos principales.</h4>';       
+        }  
         console.log(this._inventory._getLength());    
     }
 
+    // Función para eliminar un producto //
     deleteProduct = () => {
         let code = document.querySelector('#txtCode').value;
         let dltProduct = this._inventory.delete(code);
         let details = document.querySelector('#details');
+
+        document.querySelector('#txtCode').value = '';
         
         if(dltProduct) { 
             console.log(dltProduct);
             details.innerHTML += `<h4>Producto ${code} eliminado.</h4>`; 
-            console.log(this._inventory._getLength()) ;             
-        } else if(code === '') {
+            console.log(this._inventory._getLength());
+            console.log(this._inventory);             
+        } else if(!code) {
             details.innerHTML += '<h4>Ingresa un código de producto.</h4>';
         } else {
            details.innerHTML += '<h4>Este producto no existe.</h4>';
@@ -67,64 +87,154 @@ class App {
 
     }
 
+    // Función para buscar un producto //
     searchProduct = () => {
         let code = document.querySelector('#txtCode').value;
         let product = this._inventory.search(code);
         let details = document.querySelector('#details');
 
-        if(product) {                     
-            console.log(product);               
-        } else if(code === '') {      
+        if(code === '') {
             details.innerHTML += '<h4>Ingresa un código de producto.</h4>';
-        } else if(product === null) {
+            return;
+        }
+
+        document.querySelector('#txtCode').value = '';
+
+        if(product === null) {                     
             details.innerHTML += `<h4>Se ha buscado el producto ${code}.</h4>`;
             details.innerHTML += '<p>No se encontró el producto.</p>';
-            console.log(product);   
+            console.log(product);             
+        } else {
+            console.log(product);
+            document.querySelector('#details').innerHTML += 
+            `<h4>Se ha buscado el producto ${code}.</h4>`; 
+            document.querySelector('#details').innerHTML += 
+            '<div class="card"><h4>Producto encontrado</h4>' + 
+            product.dataHtml() + '<div>';    
         }
         
     }
 
+    // Función para enlistar los productos por orden de entrada //
     listProduct = () => {
         let list = this._inventory.list();
+        let details = document.querySelector('#details');
 
         if(!list) {
-            document.querySelector('#details').innerHTML += '<h4>No hay ningún producto.</h4>';
+            this._update();   
+            details.innerHTML += `<h4>No hay ningún producto.</h4>`;   
         } else {
-            document.querySelector('#details').innerHTML += '<h4>Lista Predeterminada.</h4>';
-        }    
+            this._update();    
+            this._showTable();
+            details.innerHTML += `<h4>Lista predeterminada.</h4>`;               
+        }   
+        console.log(list)
+           
     }
 
+    // Función que invierte la lista de los productos //
     reverseList = () => {
         let reverse = this._inventory.reverseList();
+        let details = document.querySelector('#details');
 
         if(!reverse) {
-            document.querySelector('#details').innerHTML += '<h4>No hay ningún producto.</h4>';
+            this._update(); 
+            details.innerHTML += '<h4>No hay ningún producto.</h4>';
         } else {
-            document.querySelector('#details').innerHTML += '<h4>Lista Invertida.</h4>';
+            this._update();    
+            this._showReverse()
+            details.innerHTML += '<h4>Lista Invertida.</h4>';
         }
     }
 
-    insertProduct= () => {
-       let insert = document.querySelector('#txtInsert');
-       let pos = Number(insert.value);
-       let product = Product.readForm();
+    // Función para insertar un producto en una posición determinada //
+    insertProduct= () => {       
+       let inpCode = document.querySelector('#txtCode');
+       let inpName = document.querySelector('#txtName');
+       let inpAmount = document.querySelector('#txtAmount');
+       let inpCost = document.querySelector('#txtCost');
+       let inpInsert = document.querySelector('#txtInsert');       
+       let code = inpCode.value;
+       let name = inpName.value;
+       let amount = Number(inpAmount.value);
+       let cost = Number(inpCost.value);
+       let insert = Number(inpInsert.value);
 
-       if(!pos || pos  === 0) {
-        document.querySelector('#details').innerHTML += '<h4>Ingresa una posición.</h4>';
-        return;
-       }
+        if(code && name && amount && cost && insert) {
+            inpCode.value = '';
+            inpName.value = '';
+            inpAmount.value = '';
+            inpCost.value = '';
+            inpInsert.value = '';
+                
+            let product =  new Product(code, name, amount, cost);
 
-       insert.value = '';
+            if(this._inventory.insert(product, insert - 1) === false) {
+                details.innerHTML += '<h4>Este producto ya está registrado.</h4>';
+                return;   
+            }
 
-       if(!product) {
-        document.querySelector('#details').innerHTML += '<h4>No has completado los datos.</h4>';
-        return;
-       } 
+            if(this._inventory._getLength() < 20) {                
+                this._inventory.insert(product, insert - 1);
+                details.innerHTML += 
+                `<h4>Se se agregó el producto ${product.getCode()} en la posición ${insert}.</h4>`;                                      
+            } 
+        } else {
+            details.innerHTML += 
+            '<h4>Ingresa todos los datos.</h4>';
+        }   
+    }
 
-       if(this._inventory._getLength() < 20) {
-        this._inventory.insert(product, pos - 1);
-        details.innerHTML += `<h4>Se se agregó el producto ${product.getCode()} en la posición ${pos}.</h4>`;        
-       } 
-    }   
+    // Métodos privados para mostrar tablas //    
+    _update() {
+        let table = document.querySelector('#table');
+        let htmlTable = `<tr>
+                            <th>CÓDIGO</th>                                
+                            <th>NOMBRE</th>                                
+                            <th>PRECIO</th>
+                            <th>CANTIDAD</th>
+                            <th>COSTO TOTAL</th>
+                        </tr>`;
+
+        table.innerHTML = htmlTable;
+    }
+
+    _showTable() {
+        let table = document.querySelector('#table');
+        let products = this._inventory.getArray();
+         
+        for(let i = 0; i < products.length; i++) {
+            let rowProducts = table.insertRow(-1);
+            let colCode = rowProducts.insertCell(0);
+            let colName = rowProducts.insertCell(1);
+            let colCost = rowProducts.insertCell(2);
+            let colAmount = rowProducts.insertCell(3);
+            let colTotal = rowProducts.insertCell(4);
+            colCode.innerHTML = products[i].getCode();
+            colName.innerHTML = products[i].getName();
+            colCost.innerHTML = `$${products[i].getCost()}`; 
+            colAmount.innerHTML = products[i].getAmount();
+            colTotal.innerHTML = `$${products[i].getTotal()}`;          
+        }
+    } 
+    
+    _showReverse() {
+        let table = document.querySelector('#table');
+        let products = this._inventory.getArray();
+         
+        for(let i = products.length -1 ; i >= 0; i--) {
+            let rowProducts = table.insertRow(-1);
+            let colCode = rowProducts.insertCell(0);
+            let colName = rowProducts.insertCell(1);
+            let colCost = rowProducts.insertCell(2);
+            let colAmount = rowProducts.insertCell(3);
+            let colTotal = rowProducts.insertCell(4);
+            colCode.innerHTML = products[i].getCode();
+            colName.innerHTML = products[i].getName();
+            colCost.innerHTML = `$${products[i].getCost()}`; 
+            colAmount.innerHTML = products[i].getAmount();
+            colTotal.innerHTML = `$${products[i].getTotal()}`;          
+        }
+    } 
 }
 new App();

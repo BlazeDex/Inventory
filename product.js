@@ -34,29 +34,5 @@ export default class Product {
                     <p>Costo Individual: $${this.getCost()}</p>
                     <p>Costo Total: $${this.getTotal()}</p>
                 </div>`;
-    }
-
-    static readForm() {
-        let inpCode = document.querySelector('#txtCode');
-        let inpName = document.querySelector('#txtName');
-        let inpAmount = document.querySelector('#txtAmount');
-        let inpCost = document.querySelector('#txtCost');
-
-        let code = inpCode.value;
-        let name = inpName.value;
-        let amount = Number(inpAmount.value);
-        let cost = Number(inpCost.value);
-       
-        if(code && name && amount && cost) {
-            inpCode.value = '';
-            inpName.value = '';
-            inpAmount.value = '';
-            inpCost.value = '';
-
-            return new Product(code, name, amount, cost);
-        }
-
-        return false;
-
-    }
+    }  
 }

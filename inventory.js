@@ -1,7 +1,11 @@
 export default class Inventory {
     constructor() {
         this._products = new Array();   
-    }   
+    } 
+    
+    getArray() {
+        return this._products;
+    }
 
     add(product) {
         let pos = this._findProducts(product);        
@@ -10,139 +14,68 @@ export default class Inventory {
         }         
         this._products.push(product);  
         return true;    
-    }    
-
+    }  
+    
     delete(code) {
-        let verify = this._verifyCode(code);
+        let pos = this._verifyCode(code);
 
-        if(verify === false) {    
-            return false;     
-        } else { 
-            this._products = this._erasedProduct(code);              
+        if(pos >= 0) {
+            for(let i = pos; i < (this._products.length - 1); i++) {                   
+                this._products[i] = this._products[i+1];       
+            }            
+            this._products.pop();
             return true;
-        }       
+        } else {
+            return null;
+        }        
     }
 
     search(product) {
         let verify = this._verifyCode(product);
 
-        if(verify === false) {            
+        if(verify < 0) {            
             return null;
-        } else {
-            document.querySelector('#details').innerHTML += 
-            `<h4>Se ha buscado el producto ${product}.</h4>`; 
-            document.querySelector('#details').innerHTML += 
-            '<div class="card"><h4>Producto encontrado</h4>' + 
-            this._products[verify].dataHtml() + '<div>'; 
-            return true;
+        } else {    
+            return this._products[verify];
         }
     }
 
     list() {
         if(this._getLength() <= 0) {
-            this._update(); 
-            return false
+            return false;
         } else {
-            this._update();
-            this._showTable();
             return true;
-        }   
+        }  
     }
 
     reverseList() {
-        if(this._reverseArray().length <= 0) { 
-            this._update();  
+        if(this._getLength() <= 0) {    
             return false;          
-        } else {
-            this._update();            
-            this._showReverse();
+        } else {   
             return true;      
         }    
     }
 
-    insert(product, pos) {
-        let nPos;
+    insert(product, inPos) {
+        let nPos; 
+        let find = this._findProducts(product);
 
-        if(this._getLength() < pos) {
-            return;
-        }
-        
-        for(let i = pos; i < (this._products.length + 1); i++) {
-            if(i === this._getLength()) {
-                let a = this._findProducts(product);        
-                    if(a) {  
-                    return false;         
-                    }
-                this._products.push(product);
-                return true;
+        if(find) {
+            return false;
+        } else {
+            for(inPos; inPos < (this._products.length + 1); inPos++) {
+                if(inPos  === this._getLength()) {              
+                    this._products.push(product);
+                    return;                        
+                }
+                nPos = this._products[inPos]; 
+                this._products[inPos] = product;
+                product = nPos;      
             }
-            nPos = this._products[pos];
-            this._products[pos] = product;
-            product = nPos;   
-        }
+            return true;   
+        }    
     }
-
-    //Inicio de: Métodos privados "Reverse"//
-    _reverseArray() { 
-        let nArray = new Array();
-        for(let i = this._getLength() - 1; i >= 0; i--) {
-            nArray.push(this._products[i]);
-        }
-        return nArray;  
-    }
-
-    _showReverse() {
-        let table = document.querySelector('#table');
-        let products = this._reverseArray();
-
-        for(let i = 0; i < products.length; i++) {
-            let rowProducts = table.insertRow(-1);
-            let colCode = rowProducts.insertCell(0);
-            let colName = rowProducts.insertCell(1);
-            let colCost = rowProducts.insertCell(2);
-            colCode.innerHTML = products[i].getCode();
-            colName.innerHTML = products[i].getName();
-            colCost.innerHTML = products[i].getCost();  
-        }      
-    }  
-    
-    // Inicio de: Métodos Privados Generales //
-    _update() {
-        let table = document.querySelector('#table');
-        let htmlTable = `<tr>
-                            <th>CÓDIGO</th>                                
-                            <th>NOMBRE</th>                                
-                            <th>PRECIO</th>
-                        </tr>`;
-        
-        table.innerHTML = htmlTable;
-    }
-
-    _showTable() {
-        let table = document.querySelector('#table');
-        let products = this._products;
-         
-        for(let i = 0; i < this._getLength(); i++) {
-            let rowProducts = table.insertRow(-1);
-            let colCode = rowProducts.insertCell(0);
-            let colName = rowProducts.insertCell(1);
-            let colCost = rowProducts.insertCell(2);
-            colCode.innerHTML = products[i].getCode();
-            colName.innerHTML = products[i].getName();
-            colCost.innerHTML = products[i].getCost();           
-        }          
-    }   
-    
-    _erasedProduct(product) {
-        let nArr = new Array();
-        for(let i = 0; i < this._getLength(); i++){ 
-            if(product !== this._products[i].getCode()) {               
-                nArr.push(this._products[i]);                
-            }     
-        }
-        return nArr;
-    }
-
+   
     _getLength() {
         return this._products.length;
     }    
@@ -153,7 +86,7 @@ export default class Inventory {
                 return i;     
             }        
         }
-        return false;  
+        return -1;  
     }
 
     _findProducts(product) {
